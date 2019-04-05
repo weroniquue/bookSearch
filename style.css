@@ -89,3 +89,10 @@ article > p {
     text-align: justify;
     padding: 0 20px;
 }
+
+.error {
+    color: red;
+    text-align: center;
+    font-size: 25px;
+    padding: 20px;
+}
