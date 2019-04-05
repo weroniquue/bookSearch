@@ -6,10 +6,7 @@ var maxResult = "&maxResults=9"
 var descriptionMaxLength = 100;
 
 var httpRequest = new XMLHttpRequest();
-
 var contentContainer = document.getElementsByClassName('content-container')[0];
-var loadingContainer = document.getElementsByClassName('loading-container')[0];
-
 
 httpRequest.onload = function () {
     if (httpRequest.status >= 200 && httpRequest.status < 300) {
