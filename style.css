@@ -13,6 +13,7 @@ header {
 .findBooks {
     margin: auto;
     max-width: 1200px;
+    background: linear-gradient(to bottom,  #ffffff 0%,#EFEFEF 100%);
 }
 
 input {
@@ -65,6 +66,8 @@ article{
     width: 33.3%;
     margin-bottom: 25px;
     border-top: #aaaaaa 2px solid;
+    padding:30px 10px;
+    box-sizing: border-box;
 
 }
 
@@ -76,11 +79,13 @@ article > img {
 article > h1{
     text-align: center;
     font-family: 'Vollkorn';
-    font-weight: 500;
+    font-weight: 800;
     font-size: 20px;
     padding: 10px;
 
 }
 
-
-    /*background: linear-gradient(to top,  #ffffff 0%,#EFEFEF 100%);*/
+article > p {
+    text-align: justify;
+    padding: 0 20px;
+}
