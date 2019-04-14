@@ -5,68 +5,97 @@ var pollingForData = false;
 const maxResult = "&maxResults=9"
 const descriptionMaxLength = 100;
 
-var httpRequest = new XMLHttpRequest();
 const contentContainer = document.getElementsByClassName('content-container')[0];
 
-httpRequest.onload = function () {
-    if (httpRequest.status >= 200 && httpRequest.status < 300) {
+function makeRequest(method, url){
 
-        pollingForData = false;
-        var books = JSON.parse(httpRequest.response);
-        var html = "";
-        page = document.createElement('div');
+    return new Promise(function (resolve, reject) {
+        var httpRequest  = new XMLHttpRequest();
+        httpRequest .open(method, url);
 
-        if (books.totalItems == 0) {
-            html = `<h1>No elements.</h1>`;
-            page.className += "error";
-            document.getElementById("search").value = "";
+        httpRequest.onload = function () {
+            if (this.status >= 200 && this.status < 300) {
+                resolve(httpRequest .response);
+                pollingForData = false;
+                var books = JSON.parse(httpRequest.response);
+                var html = "";
+                page = document.createElement('div');
 
-        } else {
-            totalBooks = books.totalItems;
-            loadElements += books.items.length;
+                if (books.totalItems == 0) {
+                    html = `<h1>No elements.</h1>`;
+                    page.className += "error";
+                    document.getElementById("search").value = "";
 
-            html = books.items.map(book => {
+                } else {
+                    totalBooks = books.totalItems;
+                    loadElements += books.items.length;
 
-                const title = book.volumeInfo.title;
-                const cover = book.volumeInfo.imageLinks === undefined ? "defbookcover.jpg" : book.volumeInfo.imageLinks.thumbnail;
-                const description = book.volumeInfo.description === undefined ? "Description is not available." :
-                    book.volumeInfo.description.substring(0, book.volumeInfo.description.lastIndexOf(" ", descriptionMaxLength)) + "...";
+                    html = books.items.map(book => {
 
-                return `
-                    <article>
-                        <img src="${cover}" alt="image">
-                        <h1>${title}</h1>
-                        <p>${description}</p>
-                    </article>`
-            }).join('');
-            page.className += "flex-container";
-        }
+                        const title = book.volumeInfo.title;
+                        const cover = book.volumeInfo.imageLinks === undefined ? "defbookcover.jpg" : book.volumeInfo.imageLinks.thumbnail;
+                        const description = book.volumeInfo.description === undefined ? "Description is not available." :
+                            book.volumeInfo.description.substring(0, book.volumeInfo.description.lastIndexOf(" ", descriptionMaxLength)) + "...";
 
-        page.innerHTML = html;
+                        return `
+                            <article>
+                                <img src="${cover}" alt="image">
+                                <h1>${title}</h1>
+                                <p>${description}</p>
+                            </article>`
+                    }).join('');
+                    page.className += "flex-container";
+                }
 
-        contentContainer.appendChild(page);
-    }
+                page.innerHTML = html;
+
+                contentContainer.appendChild(page);
+
+
+            } else {
+                reject({
+                    status: this.status,
+                    statusText: httpRequest .statusText
+                });
+            }
+        };
+        httpRequest .onerror = function () {
+            error = document.createElement('h3');
+            error.className += "error";
+            error.innerText = 'The request failed!';
+            contentContainer.appendChild(error);
+
+            reject({
+                status: this.status,
+                statusText: httpRequest .statusText
+            });
+        };
+        httpRequest.send();
+    });
+
+
 }
-
-httpRequest.onerror = function () {
-    error = document.createElement('h3');
-    error.className += "error";
-    error.innerText = 'The request failed!';
-    contentContainer.appendChild(error);
-}
-
 
 function displayBook(title) {
-    httpRequest.open('GET', endpoint + title + maxResult);
-    httpRequest.send();
+    makeRequest('GET', endpoint + title + maxResult)
+    .then(function (data) {
+
+    }).catch(function (err) {
+        console.error('Augh, there was an error!', err.statusText);
+    });
+
     pollingForData = true;
 
     window.onscroll = function () {
         if ((window.innerHeight + window.pageYOffset) >= document.body.offsetHeight - 200) {
             if (loadElements < totalBooks && !pollingForData) {
                 pollingForData = true;
-                httpRequest.open('GET', endpoint + title + '&startIndex=' + loadElements + maxResult);
-                httpRequest.send();
+                makeRequest('GET', endpoint + title + '&startIndex=' + loadElements + maxResult)
+                    .then(function (data) {
+
+                    }).catch(function (err) {
+                        console.error('Augh, there was an error!', err.statusText);
+                    });
             }
         }
     };
